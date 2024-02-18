@@ -223,10 +223,10 @@ public class AimbowGui extends GuiIngame {
 		float f1 = 0.00390625F;
 		WorldRenderer vertexBuffer = Tessellator.getInstance().getWorldRenderer();
 		vertexBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		vertexBuffer.pos(par1 + 0, par2 + par6, this.zLevel).tex((par3 + 0) * f, (par4 + par6) * f1).color(r, g, b, 1f).endVertex();
-		vertexBuffer.pos(par1 + par5, par2 + par6, this.zLevel).tex((par3 + par5) * f, (par4 + par6) * f1).color(r, g, b, 1f).endVertex();
-		vertexBuffer.pos(par1 + par5, par2 + 0, this.zLevel).tex((par3 + par5) * f, (par4 + 0) * f1).color(r, g, b, 1f).endVertex();
-		vertexBuffer.pos(par1 + 0, par2 + 0, this.zLevel).tex((par3 + 0) * f, (par4 + 0) * f1).color(r, g, b, 1f).endVertex();
+		vertexBuffer.pos(par1 + 0, par2 + par6, this.zLevel).tex((par3 + 0) * f, (par4 + par6) * f1).color(r, g, b, 0f).endVertex();
+		vertexBuffer.pos(par1 + par5, par2 + par6, this.zLevel).tex((par3 + par5) * f, (par4 + par6) * f1).color(r, g, b, 0f).endVertex();
+		vertexBuffer.pos(par1 + par5, par2 + 0, this.zLevel).tex((par3 + par5) * f, (par4 + 0) * f1).color(r, g, b, 0f).endVertex();
+		vertexBuffer.pos(par1 + 0, par2 + 0, this.zLevel).tex((par3 + 0) * f, (par4 + 0) * f1).color(r, g, b, 0f).endVertex();
 		Tessellator.getInstance().draw();
 	}
 
