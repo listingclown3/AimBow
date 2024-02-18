@@ -26,14 +26,19 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
+
+import java.io.File;
 
 import static net.famzangl.minecraft.aimbow.aiming.BowColissionSolver.force;
 
@@ -43,16 +48,28 @@ public class AimBowMod {
 	@Instance(value = "minebot-mod")
 	public static AimBowMod instance;
 
-	public static void chat(String message) {
-		Minecraft.getMinecraft().thePlayer.addChatComponentMessage(new ChatComponentText(message));
-
-	}
+	public static int red;
+	public static int green;
+	public static int blue;
+	public static int alpha;
+	public static int width;
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		final net.famzangl.minecraft.aimbow.AimBowController controller = new net.famzangl.minecraft.aimbow.AimBowController();
 		controller.initialize();
+
+		Configuration config = new Configuration(new File("config/AimBowColorGui.cfg"));
+		config.load();
+
+		ClientCommandHandler.instance.registerCommand(new AimBowColorCommand());
 		MinecraftForge.EVENT_BUS.register(this);
+
+		red = config.get("Color", "Red", 255).getInt();
+		green = config.get("Color", "Green", 255).getInt();
+		blue = config.get("Color", "Blue", 255).getInt();
+		alpha = config.get("Color", "Alpha", 255).getInt();
+		width = config.get("Color", "Width", 3).getInt();
 
 	}
 
@@ -77,6 +94,7 @@ public class AimBowMod {
 			GL11.glDisable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			GL11.glLineWidth(width);
 
 			Tessellator tessellator = Tessellator.getInstance();
 			WorldRenderer worldRenderer = tessellator.getWorldRenderer();
@@ -84,7 +102,7 @@ public class AimBowMod {
 			worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 
 			for (Vec3 point : RayData.trajectory) {
-				worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(1.0F, 0.0F, 0.0F, 1.0F).endVertex();
+				worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(red, green, blue, alpha).endVertex();
 			}
 
 			tessellator.draw();

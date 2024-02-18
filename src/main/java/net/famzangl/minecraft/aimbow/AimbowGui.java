@@ -53,8 +53,6 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
-import static net.famzangl.minecraft.aimbow.AimBowMod.chat;
-
 public class AimbowGui extends GuiIngame {
 	FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
 	FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
