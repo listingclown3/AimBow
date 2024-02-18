@@ -2,13 +2,13 @@
 {
   "modid": "AimBow",
   "name": "AimBow",
-  "description": "Updated version from Micahel Zangl's version",
+  "description": "Updated version from Micahel Zangl's 1.8 version, usable on 1.8.9 Minecraft",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["list3", "michaelzangl"],
-  "credits": "Michael Zangl for providing the source to create this updated version in the first place.",
+  "authorList": ["list3", "michaelzangl", "LegoNinja48"],
+  "credits": "Michael Zangl for providing the source to create this updated version in the first place, and LegoNinja48 for helping with some technical problems",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

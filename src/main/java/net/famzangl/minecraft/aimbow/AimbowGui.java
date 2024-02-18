@@ -216,14 +216,17 @@ public class AimbowGui extends GuiIngame {
 	public void drawTexturedModalRect(int par1, int par2, int par3, int par4,
 			int par5, int par6, float r, float g, float b) {
 
+		// Got rid of the gray box cause I don't think anyone would like it
+		// If you do, you're weird, but you can change the alpha value to 0.5F if you really want it
+
 		float f = 0.00390625F;
 		float f1 = 0.00390625F;
 		WorldRenderer vertexBuffer = Tessellator.getInstance().getWorldRenderer();
 		vertexBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		vertexBuffer.pos(par1 + 0, par2 + par6, this.zLevel).tex((par3 + 0) * f, (par4 + par6) * f1).color(r, g, b, 0.5f).endVertex();
-		vertexBuffer.pos(par1 + par5, par2 + par6, this.zLevel).tex((par3 + par5) * f, (par4 + par6) * f1).color(r, g, b, 0.5f).endVertex();
-		vertexBuffer.pos(par1 + par5, par2 + 0, this.zLevel).tex((par3 + par5) * f, (par4 + 0) * f1).color(r, g, b, 0.5f).endVertex();
-		vertexBuffer.pos(par1 + 0, par2 + 0, this.zLevel).tex((par3 + 0) * f, (par4 + 0) * f1).color(r, g, b, 0.5f).endVertex();
+		vertexBuffer.pos(par1 + 0, par2 + par6, this.zLevel).tex((par3 + 0) * f, (par4 + par6) * f1).color(r, g, b, 1f).endVertex();
+		vertexBuffer.pos(par1 + par5, par2 + par6, this.zLevel).tex((par3 + par5) * f, (par4 + par6) * f1).color(r, g, b, 1f).endVertex();
+		vertexBuffer.pos(par1 + par5, par2 + 0, this.zLevel).tex((par3 + par5) * f, (par4 + 0) * f1).color(r, g, b, 1f).endVertex();
+		vertexBuffer.pos(par1 + 0, par2 + 0, this.zLevel).tex((par3 + 0) * f, (par4 + 0) * f1).color(r, g, b, 1f).endVertex();
 		Tessellator.getInstance().draw();
 	}
 
