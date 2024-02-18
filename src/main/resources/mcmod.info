@@ -1,0 +1,16 @@
+[
+{
+  "modid": "AimBow",
+  "name": "AimBow",
+  "description": "Updated version from Micahel Zangl",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["list3", "michaelzangl"],
+  "credits": "Michael Zangl for providing the source to create this updated version in the first place.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
