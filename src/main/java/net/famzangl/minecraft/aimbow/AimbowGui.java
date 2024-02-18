@@ -79,6 +79,7 @@ public class AimbowGui extends GuiIngame {
 	public void renderGameOverlay(float partialTicks) {
 		this.partialTicks = partialTicks;
 		super.renderGameOverlay(partialTicks);
+
 	}
 
 	@Override

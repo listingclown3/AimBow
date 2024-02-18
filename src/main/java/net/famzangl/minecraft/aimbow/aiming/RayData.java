@@ -30,6 +30,9 @@ public abstract class RayData extends TickingEntity {
 	protected boolean dead;
 	protected float prevRotationYaw;
 	protected float prevRotationPitch;
+
+	public static List<Vec3> trajectory = new ArrayList();
+
 	public void setLocationAndAngles(double posX, double posY, double posZ,
 			float rotationYaw, float rotationPitch) {
 		this.rotationYaw = rotationYaw;
@@ -107,6 +110,9 @@ public abstract class RayData extends TickingEntity {
 		this.motionZ *= f3;
 		this.motionY -= f1;
 		this.setPosition(this.posX, this.posY, this.posZ);
+
+		trajectory.add(new Vec3(this.posX, this.posY, this.posZ));
+
 	}
 
 	protected abstract float getGravity();

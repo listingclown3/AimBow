@@ -16,10 +16,14 @@
  *******************************************************************************/
 package net.famzangl.minecraft.aimbow;
 
+import net.famzangl.minecraft.aimbow.aiming.BowRayData;
 import net.famzangl.minecraft.aimbow.aiming.ColissionSolver;
 import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -46,7 +50,7 @@ public class AimBowMod {
 	public void init(FMLInitializationEvent event) {
 		final net.famzangl.minecraft.aimbow.AimBowController controller = new net.famzangl.minecraft.aimbow.AimBowController();
 		controller.initialize();
-		MinecraftForge.EVENT_BUS.register(new AimbowGui(Minecraft.getMinecraft()));
+		MinecraftForge.EVENT_BUS.register(this);
 
 	}
 
@@ -54,6 +58,45 @@ public class AimBowMod {
 		return AimBowMod.class.getAnnotation(Mod.class).version();
 	}
 
+	@SubscribeEvent
+	public void onRenderWorldLast(RenderWorldLastEvent event) {
+		if (Minecraft.getMinecraft().getRenderViewEntity() == null) {
+			return;
+		}
+
+		GL11.glPushMatrix();
+		GL11.glTranslated(-Minecraft.getMinecraft().getRenderManager().viewerPosX,
+				-Minecraft.getMinecraft().getRenderManager().viewerPosY,
+				-Minecraft.getMinecraft().getRenderManager().viewerPosZ);
+
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+
+		worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+		// if (Minecraft.getMinecraft().thePlayer.getHeldItem() instanceof BowItem)
+
+		for (Vec3 point : RayData.trajectory) {
+			worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(1.0F, 0.0F, 0.0F, 1.0F).endVertex();
+		}
+
+		tessellator.draw();
+
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+		GL11.glPopMatrix();
+		BowRayData.trajectory.clear();
+		RayData.trajectory.clear();
+
+
+
+	}
 
 
 }

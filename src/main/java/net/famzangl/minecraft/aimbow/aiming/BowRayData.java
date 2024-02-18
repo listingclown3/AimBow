@@ -16,6 +16,8 @@
  *******************************************************************************/
 package net.famzangl.minecraft.aimbow.aiming;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import net.minecraft.entity.Entity;
@@ -37,6 +39,12 @@ public class BowRayData extends RayData {
 	
 	public BowRayData(int force) {
 		this.force = force;
+	}
+
+	@Override
+	public void moveTick() {
+		super.moveTick();
+		trajectory.add(new Vec3(this.posX, this.posY, this.posZ));
 	}
 
 	public void shoot() {
