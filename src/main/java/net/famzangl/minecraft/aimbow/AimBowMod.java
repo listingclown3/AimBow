@@ -35,6 +35,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
+import static net.famzangl.minecraft.aimbow.aiming.BowColissionSolver.force;
+
 @Mod(modid="aimbow-mod", name = "AimBow", version = "0.1.0")
 public class AimBowMod {
 
@@ -64,39 +66,38 @@ public class AimBowMod {
 			return;
 		}
 
-		GL11.glPushMatrix();
-		GL11.glTranslated(-Minecraft.getMinecraft().getRenderManager().viewerPosX,
-				-Minecraft.getMinecraft().getRenderManager().viewerPosY,
-				-Minecraft.getMinecraft().getRenderManager().viewerPosZ);
+		if (!(force <= 0.2)) { // should make customizable
 
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			GL11.glPushMatrix();
+			GL11.glTranslated(-Minecraft.getMinecraft().getRenderManager().viewerPosX,
+					-Minecraft.getMinecraft().getRenderManager().viewerPosY,
+					-Minecraft.getMinecraft().getRenderManager().viewerPosZ);
 
-		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			GL11.glDisable(GL11.GL_LIGHTING);
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-		worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-		// if (Minecraft.getMinecraft().thePlayer.getHeldItem() instanceof BowItem)
+			Tessellator tessellator = Tessellator.getInstance();
+			WorldRenderer worldRenderer = tessellator.getWorldRenderer();
 
-		for (Vec3 point : RayData.trajectory) {
-			worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(1.0F, 0.0F, 0.0F, 1.0F).endVertex();
+			worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+
+			for (Vec3 point : RayData.trajectory) {
+				worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(1.0F, 0.0F, 0.0F, 1.0F).endVertex();
+			}
+
+			tessellator.draw();
+
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glEnable(GL11.GL_LIGHTING);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+			GL11.glPopMatrix();
+			RayData.trajectory.clear();
+
+
 		}
-
-		tessellator.draw();
-
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-		GL11.glPopMatrix();
-		BowRayData.trajectory.clear();
-		RayData.trajectory.clear();
-
-
-
 	}
-
 
 }

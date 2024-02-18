@@ -35,9 +35,9 @@ import net.minecraft.util.Vec3;
  */
 public class BowRayData extends RayData {
 	private static final boolean USE_RANDOM = false;
-	private int force;
+	private float force;
 	
-	public BowRayData(int force) {
+	public BowRayData(float force) {
 		this.force = force;
 	}
 

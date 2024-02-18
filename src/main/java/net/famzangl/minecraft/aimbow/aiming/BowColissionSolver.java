@@ -22,6 +22,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBow;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -37,6 +41,8 @@ import net.minecraft.util.Vec3;
  *
  */
 public class BowColissionSolver extends ColissionSolver {
+
+	public static float force;
 	public BowColissionSolver(Minecraft mc, EntityLivingBase renderViewEntity) {
 		super(mc, renderViewEntity);
 	}
@@ -90,7 +96,19 @@ public class BowColissionSolver extends ColissionSolver {
 	}
 	
 	@Override
-	protected RayData generateRayData() {
-		return new BowRayData(2);
+	public RayData generateRayData() {
+		int useDuration = Minecraft.getMinecraft().thePlayer.getItemInUseDuration();
+
+		ItemStack itemStack = Minecraft.getMinecraft().thePlayer.getItemInUse(); // Get the item in the player's main hand
+		boolean b = itemStack != null && itemStack.getItem() instanceof ItemBow; // Check if the item is a bow
+
+		if (b) {
+			float drawTime = Math.min(useDuration, 20) / 20.0f;
+			force = 2 * drawTime * drawTime * drawTime;
+		} else {
+			force = 2;
+		}
+
+		return new BowRayData(force);
 	}
 }
