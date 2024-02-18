@@ -2,7 +2,7 @@
 {
   "modid": "AimBow",
   "name": "AimBow",
-  "description": "Updated version from Micahel Zangl",
+  "description": "Updated version from Micahel Zangl's version",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",

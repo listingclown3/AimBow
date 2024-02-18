@@ -49,6 +49,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
+import static net.famzangl.minecraft.aimbow.AimBowMod.TrajectoryState;
+
 public class AimBowController {
 	protected static final KeyBinding autoAimKey = new KeyBinding("Auto aim",
 			Keyboard.getKeyIndex("Y"), "AimBow");
@@ -78,11 +80,17 @@ public class AimBowController {
 		}
 		
 		if (autoAimKey.isPressed()) {
-			gui.autoAim = !gui.autoAim;
+			if (TrajectoryState) {
+				gui.autoAim = !gui.autoAim;
 
-			Minecraft.getMinecraft().thePlayer
-					.addChatMessage(new ChatComponentText("Autoaim: "
-							+ (gui.autoAim ? "On" : "Off")));
+				Minecraft.getMinecraft().thePlayer
+						.addChatMessage(new ChatComponentText("Autoaim: "
+								+ (gui.autoAim ? "On" : "Off")));
+			} else {
+				Minecraft.getMinecraft().thePlayer
+						.addChatMessage(new ChatComponentText("Enable Trajectory Permissions First! /aimbow"));
+
+			}
 		}
 	}
 

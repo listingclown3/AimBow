@@ -2,22 +2,20 @@ package net.famzangl.minecraft.aimbow;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-public class AimBowColorCommand extends CommandBase {
+public class AimBowCommand extends CommandBase {
     @Override
     public String getCommandName() {
-        return "aimbowcolor";
+        return "aimbow";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/aimbowcolor";
+        return "/aimbow";
     }
 
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
@@ -31,7 +29,7 @@ public class AimBowColorCommand extends CommandBase {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        Minecraft.getMinecraft().displayGuiScreen(new AimBowColorGui());
+        Minecraft.getMinecraft().displayGuiScreen(new AimBowCommandGui());
         MinecraftForge.EVENT_BUS.unregister(this);
 
     }

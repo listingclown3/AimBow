@@ -24,8 +24,11 @@ import java.util.Collections;
 import java.util.List;
 
 import net.famzangl.minecraft.aimbow.aiming.*;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -53,6 +56,8 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
+import static net.famzangl.minecraft.aimbow.AimBowMod.*;
+
 public class AimbowGui extends GuiIngame {
 	FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
 	FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
@@ -78,6 +83,35 @@ public class AimbowGui extends GuiIngame {
 		this.partialTicks = partialTicks;
 		super.renderGameOverlay(partialTicks);
 
+		if (TrajectoryState) {
+			if (blockDistanceState) {
+				for (Vec3 point : RayData.trajectory) {
+					BlockPos blockPos = new BlockPos(point.xCoord, point.yCoord, point.zCoord);
+					IBlockState blockState = Minecraft.getMinecraft().theWorld.getBlockState(blockPos);
+
+					if (blockState.getBlock() != Blocks.air) {
+
+						Vec3 playerPos = Minecraft.getMinecraft().thePlayer.getPositionVector();
+
+						// Get the block's position
+						Vec3 blockPosVec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+
+						// Calculate the distance
+						double distance = playerPos.distanceTo(blockPosVec);
+
+						// Draw the distance next to the crosshair
+						String distanceText = String.format("Distance to block: %.2f", distance);
+						ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+						int width = scaledResolution.getScaledWidth();
+						int height = scaledResolution.getScaledHeight();
+						Minecraft.getMinecraft().fontRendererObj.drawString(distanceText, width / 2 + 10, height / 2 - 4, 0xFFFFFF);
+						break;
+					}
+				}
+			}
+
+		}
+
 	}
 
 	@Override
@@ -85,49 +119,55 @@ public class AimbowGui extends GuiIngame {
 		EntityPlayerSP player = mc.thePlayer;
 		ItemStack heldItem = player.getHeldItem();
 		ColissionSolver colissionSolver = ColissionSolver.forItem(heldItem, mc);
-		if (colissionSolver != null) {
-			checkForMatrixStealing();
-			final ScaledResolution resolution = new ScaledResolution(this.mc
-			);
-			boolean colissionDrawn = false;
-			ArrayList<ColissionData> colissionPoints = colissionSolver
-					.computeCurrentColissionPoints();
-			for (ColissionData p : colissionPoints) {
-				Pos2 pos = getPositionOnScreen(mc, p.x,
-						p.y + player.getEyeHeight(), p.z, resolution);
-				//System.out.println("Hitpoint: " + p + " is on screen: " + pos);
-				boolean hit = p.hitEntity != null;
-				drawCrosshairAt(mc, pos.x, pos.y, hit ? 0 : 1, hit ? 1 : 0, 0);
-				zc.zoomTowards(new Vec3(p.x, p.y, p.z));
-				if (!colissionDrawn && !hit && autoAim
-						&& shouldAutoaim(heldItem)) {
-					aimAtCloseEntity(pos, resolution, colissionSolver);
+		if (TrajectoryState) {
+			if (colissionSolver != null) {
+				checkForMatrixStealing();
+				final ScaledResolution resolution = new ScaledResolution(this.mc
+				);
+				boolean colissionDrawn = false;
+				ArrayList<ColissionData> colissionPoints = colissionSolver
+						.computeCurrentColissionPoints();
+				for (ColissionData p : colissionPoints) {
+					Pos2 pos = getPositionOnScreen(mc, p.x,
+							p.y + player.getEyeHeight(), p.z, resolution);
+					//System.out.println("Hitpoint: " + p + " is on screen: " + pos);
+					boolean hit = p.hitEntity != null;
+					drawCrosshairAt(mc, pos.x, pos.y, hit ? 0 : 1, hit ? 1 : 0, 0);
+					zc.zoomTowards(new Vec3(p.x, p.y, p.z));
+					if (!colissionDrawn && !hit && autoAim
+							&& shouldAutoaim(heldItem)) {
+						aimAtCloseEntity(pos, resolution, colissionSolver);
+					}
+					colissionDrawn = true;
 				}
-				colissionDrawn = true;
+				if (!colissionDrawn) {
+					int x = resolution.getScaledWidth() / 2;
+					int y = resolution.getScaledHeight() / 2;
+					drawCrosshairAt(mc, x, y, .6f, .6f, .6f);
+				}
+				// if (count == 0 || !colissionDrawn) {
+				// zc.apply(0);
+				// zc.reset();
+				// } else {
+				// float f1 = count / 20.0F;
+				//
+				// if (f1 > 1.0F) {
+				// f1 = 1.0F;
+				// } else {
+				// f1 *= f1;
+				// }
+				// zc.apply(f1);
+				// }
+				return false;
+			} else {
+				return super.showCrosshair();
 			}
-			if (!colissionDrawn) {
-				int x = resolution.getScaledWidth() / 2;
-				int y = resolution.getScaledHeight() / 2;
-				drawCrosshairAt(mc, x, y, .6f, .6f, .6f);
-			}
-			// if (count == 0 || !colissionDrawn) {
-			// zc.apply(0);
-			// zc.reset();
-			// } else {
-			// float f1 = count / 20.0F;
-			//
-			// if (f1 > 1.0F) {
-			// f1 = 1.0F;
-			// } else {
-			// f1 *= f1;
-			// }
-			// zc.apply(f1);
-			// }
-			return false;
+
 		} else {
 			return super.showCrosshair();
 		}
-	}
+    }
+
 
 	private void checkForMatrixStealing() {
 		try {
@@ -156,9 +196,9 @@ public class AimbowGui extends GuiIngame {
 	private void drawCrosshairAt(Minecraft mc, int x, int y, float r, float g,
 			float b) {
 		//GlStateManager.tryBlendFuncSeparate(775, 769, 1, 0);
-		GlStateManager.enableBlend();
-		GlStateManager.enableAlpha();
-		drawTexturedModalRect(x - 7, y - 7, 0, 0, 16, 16, r, g, b);
+				GlStateManager.enableBlend();
+				GlStateManager.enableAlpha();
+				drawTexturedModalRect(x - 7, y - 7, 0, 0, 16, 16, r, g, b);
 		// mc.getTextureManager().bindTexture(Gui.icons);
 		// GL11.glEnable(GL11.GL_BLEND);
 		// drawTexturedModalRect(x - 7, y - 7, 0, 0, 16, 16, r, g, b);
@@ -167,7 +207,7 @@ public class AimbowGui extends GuiIngame {
 
 	/**
 	 * Draws a textured rectangle at the stored z-value. Args: x, y, u, v,
-	 * width, height
+	 * width, height given CrossHairState in configuration file is set to true
 	 * 
 	 * @param b
 	 * @param g
@@ -175,6 +215,7 @@ public class AimbowGui extends GuiIngame {
 	 */
 	public void drawTexturedModalRect(int par1, int par2, int par3, int par4,
 			int par5, int par6, float r, float g, float b) {
+
 		float f = 0.00390625F;
 		float f1 = 0.00390625F;
 		WorldRenderer vertexBuffer = Tessellator.getInstance().getWorldRenderer();
@@ -184,7 +225,6 @@ public class AimbowGui extends GuiIngame {
 		vertexBuffer.pos(par1 + par5, par2 + 0, this.zLevel).tex((par3 + par5) * f, (par4 + 0) * f1).color(r, g, b, 0.5f).endVertex();
 		vertexBuffer.pos(par1 + 0, par2 + 0, this.zLevel).tex((par3 + 0) * f, (par4 + 0) * f1).color(r, g, b, 0.5f).endVertex();
 		Tessellator.getInstance().draw();
-
 	}
 
 	public Pos2 getPositionOnScreen(Minecraft mc, double x, double y, double z,

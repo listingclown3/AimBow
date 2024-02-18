@@ -16,21 +16,16 @@
  *******************************************************************************/
 package net.famzangl.minecraft.aimbow;
 
-import net.famzangl.minecraft.aimbow.aiming.BowRayData;
-import net.famzangl.minecraft.aimbow.aiming.ColissionSolver;
 import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -53,6 +48,9 @@ public class AimBowMod {
 	public static int blue;
 	public static int alpha;
 	public static int width;
+	public static boolean crossHairState;
+	public static boolean blockDistanceState;
+	public static boolean TrajectoryState;
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
@@ -62,7 +60,7 @@ public class AimBowMod {
 		Configuration config = new Configuration(new File("config/AimBowColorGui.cfg"));
 		config.load();
 
-		ClientCommandHandler.instance.registerCommand(new AimBowColorCommand());
+		ClientCommandHandler.instance.registerCommand(new AimBowCommand());
 		MinecraftForge.EVENT_BUS.register(this);
 
 		red = config.get("Color", "Red", 255).getInt();
@@ -70,6 +68,9 @@ public class AimBowMod {
 		blue = config.get("Color", "Blue", 255).getInt();
 		alpha = config.get("Color", "Alpha", 255).getInt();
 		width = config.get("Color", "Width", 3).getInt();
+		crossHairState = config.get("General", "CrossHairState", false).getBoolean();
+		blockDistanceState = config.get("General", "HighlightLandingBlockState", false).getBoolean();
+		TrajectoryState = config.get("General", "Trajectory", true).getBoolean();
 
 	}
 
@@ -83,38 +84,40 @@ public class AimBowMod {
 			return;
 		}
 
-		if (!(force <= 0.2)) { // should make customizable
+		if (TrajectoryState) {
+			if (!(force <= 0.2)) { // should make customizable
 
-			GL11.glPushMatrix();
-			GL11.glTranslated(-Minecraft.getMinecraft().getRenderManager().viewerPosX,
-					-Minecraft.getMinecraft().getRenderManager().viewerPosY,
-					-Minecraft.getMinecraft().getRenderManager().viewerPosZ);
+				GL11.glPushMatrix();
+				GL11.glTranslated(-Minecraft.getMinecraft().getRenderManager().viewerPosX,
+						-Minecraft.getMinecraft().getRenderManager().viewerPosY,
+						-Minecraft.getMinecraft().getRenderManager().viewerPosZ);
 
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glDisable(GL11.GL_LIGHTING);
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glLineWidth(width);
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+				GL11.glDisable(GL11.GL_LIGHTING);
+				GL11.glEnable(GL11.GL_BLEND);
+				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				GL11.glLineWidth(width);
 
-			Tessellator tessellator = Tessellator.getInstance();
-			WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+				Tessellator tessellator = Tessellator.getInstance();
+				WorldRenderer worldRenderer = tessellator.getWorldRenderer();
 
-			worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+				worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 
-			for (Vec3 point : RayData.trajectory) {
-				worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(red, green, blue, alpha).endVertex();
+				for (Vec3 point : RayData.trajectory) {
+					worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(red, green, blue, alpha).endVertex();
+				}
+
+				tessellator.draw();
+
+				GL11.glDisable(GL11.GL_BLEND);
+				GL11.glEnable(GL11.GL_LIGHTING);
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+				GL11.glPopMatrix();
+				RayData.trajectory.clear();
+
+
 			}
-
-			tessellator.draw();
-
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_LIGHTING);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-			GL11.glPopMatrix();
-			RayData.trajectory.clear();
-
-
 		}
 	}
 
