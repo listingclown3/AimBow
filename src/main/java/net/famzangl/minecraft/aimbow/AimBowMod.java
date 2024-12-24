@@ -18,10 +18,17 @@ package net.famzangl.minecraft.aimbow;
 
 import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -79,6 +86,13 @@ public class AimBowMod {
 	}
 
 	@SubscribeEvent
+	public void onRender3D(RenderWorldLastEvent event) {
+		if (Minecraft.getMinecraft().thePlayer != null) {
+			drawCollisionBox(event.partialTicks);
+		}
+	}
+
+	@SubscribeEvent
 	public void onRenderWorldLast(RenderWorldLastEvent event) {
 		if (Minecraft.getMinecraft().getRenderViewEntity() == null) {
 			return;
@@ -120,5 +134,92 @@ public class AimBowMod {
 			}
 		}
 	}
+
+
+	public void drawCollisionBox(float partialTicks) {
+		if (!RayData.trajectory.isEmpty()) {
+			// Get the last position from the trajectory
+			Vec3 lastPos = RayData.trajectory.get(RayData.trajectory.size() - 1);
+
+			// Convert Vec3 to BlockPos
+			BlockPos endBlock = new BlockPos(lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
+
+			// Draw the box around this block
+			drawBlockHighlight(endBlock, partialTicks);
+		} else {
+			return;
+
+		}
+	}
+
+	private void drawBlockHighlight(BlockPos pos, float partialTicks) {
+		Entity viewer = Minecraft.getMinecraft().getRenderViewEntity();
+		double viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks;
+		double viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks;
+		double viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks;
+
+		GlStateManager.pushMatrix();
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+		GlStateManager.disableTexture2D();
+		GlStateManager.depthMask(false);
+		GL11.glLineWidth(2.0f);
+
+		// Set color
+		GL11.glColor4f(red, green, blue, alpha);
+
+		// Draw box
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+
+		AxisAlignedBB box = new AxisAlignedBB(
+				pos.getX(), pos.getY(), pos.getZ(),
+				pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
+		).expand(0.002, 0.002, 0.002)
+				.offset(-viewerX, -viewerY, -viewerZ);
+
+		// Draw outline
+		worldrenderer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+
+		// Bottom
+		worldrenderer.pos(box.minX, box.minY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.minY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.minY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.minY, box.maxZ).endVertex();
+		worldrenderer.pos(box.maxX, box.minY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.minY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.minY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.minY, box.minZ).endVertex();
+
+		// Top
+		worldrenderer.pos(box.minX, box.maxY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.maxY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.maxY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.maxY, box.maxZ).endVertex();
+		worldrenderer.pos(box.maxX, box.maxY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.maxY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.maxY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.maxY, box.minZ).endVertex();
+
+		// Verticals
+		worldrenderer.pos(box.minX, box.minY, box.minZ).endVertex();
+		worldrenderer.pos(box.minX, box.maxY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.minY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.maxY, box.minZ).endVertex();
+		worldrenderer.pos(box.maxX, box.minY, box.maxZ).endVertex();
+		worldrenderer.pos(box.maxX, box.maxY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.minY, box.maxZ).endVertex();
+		worldrenderer.pos(box.minX, box.maxY, box.maxZ).endVertex();
+
+		tessellator.draw();
+
+		// Reset GL states
+		GL11.glLineWidth(1.0F);
+		GlStateManager.depthMask(true);
+		GlStateManager.enableTexture2D();
+		GlStateManager.disableBlend();
+		GlStateManager.popMatrix();
+	}
+
 
 }

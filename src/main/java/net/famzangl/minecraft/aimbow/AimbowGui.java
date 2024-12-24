@@ -28,7 +28,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.*;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -50,9 +51,6 @@ import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
@@ -78,6 +76,8 @@ public class AimbowGui extends GuiIngame {
 		super(mcIn);
 	}
 
+
+
 	@Override
 	public void renderGameOverlay(float partialTicks) {
 		this.partialTicks = partialTicks;
@@ -90,21 +90,16 @@ public class AimbowGui extends GuiIngame {
 					IBlockState blockState = Minecraft.getMinecraft().theWorld.getBlockState(blockPos);
 
 					if (blockState.getBlock() != Blocks.air) {
-
 						Vec3 playerPos = Minecraft.getMinecraft().thePlayer.getPositionVector();
-
-						// Get the block's position
 						Vec3 blockPosVec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-
-						// Calculate the distance
 						double distance = playerPos.distanceTo(blockPosVec);
 
-						// Draw the distance next to the crosshair
 						String distanceText = String.format("Distance to block: %.2f", distance);
 						ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
 						int width = scaledResolution.getScaledWidth();
 						int height = scaledResolution.getScaledHeight();
 						Minecraft.getMinecraft().fontRendererObj.drawString(distanceText, width / 2 + 10, height / 2 - 4, 0xFFFFFF);
+
 						break;
 					}
 				}
@@ -113,6 +108,9 @@ public class AimbowGui extends GuiIngame {
 		}
 
 	}
+
+
+
 
 	@Override
 	protected boolean showCrosshair() {

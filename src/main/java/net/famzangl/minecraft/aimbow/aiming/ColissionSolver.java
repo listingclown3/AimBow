@@ -23,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -99,8 +100,10 @@ public abstract class ColissionSolver {
 	public static ColissionSolver forItem(ItemStack heldItem, Minecraft mc) {
 		if (heldItem == null) {
 			return null;
-		} else if (heldItem.getItem() == Items.snowball || heldItem.getItem() == Items.egg) {
+		} else if (heldItem.getItem() == Items.snowball || heldItem.getItem() == Items.egg || heldItem.getItem() == Items.ender_pearl) {
 			return new ThrowableColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
+		} else if (heldItem.getItem() == Items.experience_bottle || (heldItem.getItem() == Items.potionitem && ItemPotion.isSplash(heldItem.getMetadata()))) { // check for throwable potion metadata / exp bottles
+			return new PotionColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		} else if (heldItem.getItem() == Items.bow) {
 			return new BowColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		}
