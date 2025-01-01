@@ -19,12 +19,16 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 [Video](https://youtu.be/TnqWZ5gxEG4)
 
 ## Todo
-- Add highlighting block position (like a beacon)
+- Add fishing rod predictions
 - Smart autoaiming (predicts how to hit entity based on its speed, direction, etc)
 - More customizability
 - Explain the math
 - Fix the mcmod.info
 - Fix overlay rendering (messes with skyblock mod maps, etc.)
+- Auto EnderClutch
+- Auto PotionHeal
+- Auto PotionDamage
+- Auto FishingHit
 
 ## Suggestions
 
