@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Minebot.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package net.famzangl.minecraft.aimbow.aiming;
+package net.famzangl.minecraft.aimbow.aiming.Throwables;
 
-import net.minecraft.entity.Entity;
+import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
 
 public class ThrowableRayData extends RayData {
 

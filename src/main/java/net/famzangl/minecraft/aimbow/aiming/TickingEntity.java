@@ -51,7 +51,7 @@ public class TickingEntity {
 	 * Entity rotation Pitch
 	 */
 	public float rotationPitch;
-	AxisAlignedBB boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+	public AxisAlignedBB boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 	public double prevPosX;
 	public double prevPosY;
 	public double prevPosZ;

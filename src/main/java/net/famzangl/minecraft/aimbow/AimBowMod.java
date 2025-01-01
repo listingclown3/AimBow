@@ -18,7 +18,6 @@ package net.famzangl.minecraft.aimbow;
 
 import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -26,9 +25,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,7 +39,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.File;
 
-import static net.famzangl.minecraft.aimbow.aiming.BowColissionSolver.force;
+import static net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver.force;
 
 @Mod(modid="aimbow-mod", name = "AimBow", version = "0.1.0")
 public class AimBowMod {

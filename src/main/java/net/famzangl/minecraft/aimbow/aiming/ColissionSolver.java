@@ -17,8 +17,11 @@
 package net.famzangl.minecraft.aimbow.aiming;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.Fishing.FishingColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.Potion.PotionColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.Throwables.ThrowableColissionSolver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -106,6 +109,9 @@ public abstract class ColissionSolver {
 			return new PotionColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		} else if (heldItem.getItem() == Items.bow) {
 			return new BowColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
+		} else if (heldItem.getItem() == Items.fishing_rod) {
+			return new FishingColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
+
 		}
 		return null;
 	}

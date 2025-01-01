@@ -24,22 +24,17 @@ import java.util.Collections;
 import java.util.List;
 
 import net.famzangl.minecraft.aimbow.aiming.*;
+import net.famzangl.minecraft.aimbow.aiming.Bow.ReverseBowSolver;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.ChunkRenderContainer;
@@ -51,8 +46,6 @@ import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
 import static net.famzangl.minecraft.aimbow.AimBowMod.*;
 

@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Minebot.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package net.famzangl.minecraft.aimbow.aiming;
+package net.famzangl.minecraft.aimbow.aiming.Potion;
 
+import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.util.MathHelper;
 
-import static net.famzangl.minecraft.aimbow.aiming.PotionColissionSolver.velocityPotion;
+import static net.famzangl.minecraft.aimbow.aiming.Potion.PotionColissionSolver.velocityPotion;
+
 
 public class PotionRayData extends RayData {
 

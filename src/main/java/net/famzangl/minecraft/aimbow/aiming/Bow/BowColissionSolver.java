@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Minebot.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package net.famzangl.minecraft.aimbow.aiming;
+package net.famzangl.minecraft.aimbow.aiming.Bow;
 
 import java.util.List;
 
+import net.famzangl.minecraft.aimbow.aiming.ColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;

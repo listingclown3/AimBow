@@ -16,38 +16,15 @@
  *******************************************************************************/
 package net.famzangl.minecraft.aimbow;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import net.famzangl.minecraft.aimbow.aiming.ColissionData;
-import net.famzangl.minecraft.aimbow.aiming.BowColissionSolver;
-import net.famzangl.minecraft.aimbow.aiming.ReverseBowSolver;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 import static net.famzangl.minecraft.aimbow.AimBowMod.TrajectoryState;
 

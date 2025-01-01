@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Minebot.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package net.famzangl.minecraft.aimbow.aiming;
+package net.famzangl.minecraft.aimbow.aiming.Potion;
 
-import java.util.List;
-
+import net.famzangl.minecraft.aimbow.aiming.ColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.RayData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -25,9 +25,13 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
-public class ThrowableColissionSolver extends ColissionSolver{
+import java.util.List;
 
-	public ThrowableColissionSolver(Minecraft mc, EntityLivingBase renderViewEntity) {
+public class PotionColissionSolver extends ColissionSolver {
+
+    public static float velocityPotion = 0.7f;
+
+	public PotionColissionSolver(Minecraft mc, EntityLivingBase renderViewEntity) {
 		super(mc, renderViewEntity);
 	}
 
@@ -82,12 +86,12 @@ public class ThrowableColissionSolver extends ColissionSolver{
 	
 	@Override
 	public float getVelocity() {
-		return 1.5f;
+		return velocityPotion;
 	}
 	
 	@Override
 	protected RayData generateRayData() {
-		return new ThrowableRayData();
+		return new PotionRayData();
 	}
 
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Minebot.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package net.famzangl.minecraft.aimbow.aiming;
+package net.famzangl.minecraft.aimbow.aiming.Bow;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
