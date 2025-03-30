@@ -1,15 +1,15 @@
 ## AimBot 1.8.9
 
 Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original [Minebot/Aimbow](https://github.com/michaelzangl/minebot/tree/forge-1.8.9/AimBow) project
-<br>I simply added to the project with the help of LegoNinja48 and updated the compatibility to 1.8.9
+<br>I simply added to the project with the help of LegoNinja48 and updated the compatibility to 1.8.9 (amazing wrapper!)
 
 ## Features
 
 - 1.8.9 Forge Minecraft functionality
-- Graphs the trajectory of projectiles and arrows
+- Graphs the trajectory of projectiles, arrows, fishing rods, etc.
 - Customizable trajectory colors
 - Crosshair fixing (Not really functional?)
-- Block distance (Doesn't really work for projectiles but works for the bow)
+- Block distance (works sometimes)
 
 ## Explaining the Math
 
@@ -19,7 +19,6 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 [Video](https://youtu.be/TnqWZ5gxEG4)
 
 ## Todo
-- Add fishing rod predictions
 - Smart autoaiming (predicts how to hit entity based on its speed, direction, etc)
 - More customizability
 - Explain the math
@@ -29,6 +28,10 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 - Auto PotionHeal
 - Auto PotionDamage
 - Auto FishingHit
+- add flashback feature (when in motion save the projectile trajectory until trajectory is complete, that way recorrections can be made)
+   * set changeable amount of flashbacks (i.e, 5 predictions can be saved after shooting before the next one is created and the oldest is unrendered)
+
+* splash potion vs bottle o enchanting MIGHT have difference velocity values, etc. is changeable
 
 ## Suggestions
 
