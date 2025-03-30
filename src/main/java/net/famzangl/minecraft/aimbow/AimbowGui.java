@@ -1,385 +1,353 @@
-/*******************************************************************************
- * This file is part of Minebot.
- *
- * Minebot is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Minebot is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Minebot.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package net.famzangl.minecraft.aimbow;
 
-import java.lang.reflect.Field;
+import net.famzangl.minecraft.aimbow.aiming.Bow.ReverseBowSolver;
+import net.famzangl.minecraft.aimbow.aiming.ColissionData;
+import net.famzangl.minecraft.aimbow.aiming.ColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.RayData;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.*;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.famzangl.minecraft.aimbow.aiming.*;
-import net.famzangl.minecraft.aimbow.aiming.Bow.ReverseBowSolver;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.*;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.GuiIngame;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.ChunkRenderContainer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.chunk.RenderChunk;
-import net.minecraft.entity.Entity;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-
 import static net.famzangl.minecraft.aimbow.AimBowMod.*;
+import static net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver.force;
 
-public class AimbowGui extends GuiIngame {
-	FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
-	FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
-	IntBuffer viewPort = BufferUtils.createIntBuffer(4);
-	/**
-	 * Remporarely used.
-	 */
-	private final FloatBuffer win_pos = BufferUtils.createFloatBuffer(3);
-	private final double zLevel = 0;
-	Minecraft mc = Minecraft.getMinecraft();
+public class AimbowGui {
 
-	private final ZoomController zc = new ZoomController();
-	private float partialTicks;
-	public boolean autoAim;
-	private MatrixCatcher catcher;
+    private final FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
+    private final FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
+    private final IntBuffer viewPort = BufferUtils.createIntBuffer(4);
+    private final FloatBuffer win_pos = BufferUtils.createFloatBuffer(3);
+    private final Minecraft mc = Minecraft.getMinecraft();
+    private float partialTicks;
+    public boolean autoAim;
 
-	public AimbowGui(Minecraft mcIn) {
-		super(mcIn);
-	}
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void onRenderGameOverlay(RenderGameOverlayEvent.Post event) {
+        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
 
+        partialTicks = event.partialTicks;
+        ScaledResolution resolution = new ScaledResolution(mc);
 
+        if (TrajectoryState) {
+            if (blockDistanceState) {
+                renderBlockDistance(resolution);
+            }
+        }
 
-	@Override
-	public void renderGameOverlay(float partialTicks) {
-		this.partialTicks = partialTicks;
-		super.renderGameOverlay(partialTicks);
+        renderCustomCrosshair(resolution);
+    }
 
-		if (TrajectoryState) {
-			if (blockDistanceState) {
-				for (Vec3 point : RayData.trajectory) {
-					BlockPos blockPos = new BlockPos(point.xCoord, point.yCoord, point.zCoord);
-					IBlockState blockState = Minecraft.getMinecraft().theWorld.getBlockState(blockPos);
+    @SubscribeEvent
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (TrajectoryState) {
+            renderTrajectory(event.partialTicks);
+        }
+        drawCollisionBox(event.partialTicks);
+    }
 
-					if (blockState.getBlock() != Blocks.air) {
-						Vec3 playerPos = Minecraft.getMinecraft().thePlayer.getPositionVector();
-						Vec3 blockPosVec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-						double distance = playerPos.distanceTo(blockPosVec);
+    private void renderTrajectory(float partialTicks) {
+        if (force <= 0.2) return;
 
-						String distanceText = String.format("Distance to block: %.2f", distance);
-						ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
-						int width = scaledResolution.getScaledWidth();
-						int height = scaledResolution.getScaledHeight();
-						Minecraft.getMinecraft().fontRendererObj.drawString(distanceText, width / 2 + 10, height / 2 - 4, 0xFFFFFF);
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glLineWidth(width);
 
-						break;
-					}
-				}
-			}
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 
-		}
+        for (Vec3 point : RayData.trajectory) {
+            worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord)
+                    .color(red, green, blue, alpha)
+                    .endVertex();
+        }
 
-	}
+        tessellator.draw();
 
+        GL11.glLineWidth(width);
+        GlStateManager.enableLighting();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
 
+    private void renderBlockDistance(ScaledResolution resolution) {
+        for (Vec3 point : RayData.trajectory) {
+            BlockPos blockPos = new BlockPos(point.xCoord, point.yCoord, point.zCoord);
+            IBlockState blockState = mc.theWorld.getBlockState(blockPos);
 
+            if (blockState.getBlock() != Blocks.air) {
+                Vec3 playerPos = mc.thePlayer.getPositionVector();
+                double distance = playerPos.distanceTo(new Vec3(blockPos));
+                String text = String.format("Distance: %.1f", distance);
 
-	@Override
-	protected boolean showCrosshair() {
-		EntityPlayerSP player = mc.thePlayer;
-		ItemStack heldItem = player.getHeldItem();
-		ColissionSolver colissionSolver = ColissionSolver.forItem(heldItem, mc);
-		if (TrajectoryState) {
-			if (colissionSolver != null) {
-				checkForMatrixStealing();
-				final ScaledResolution resolution = new ScaledResolution(this.mc
-				);
-				boolean colissionDrawn = false;
-				ArrayList<ColissionData> colissionPoints = colissionSolver
-						.computeCurrentColissionPoints();
-				for (ColissionData p : colissionPoints) {
-					Pos2 pos = getPositionOnScreen(mc, p.x,
-							p.y + player.getEyeHeight(), p.z, resolution);
-					//System.out.println("Hitpoint: " + p + " is on screen: " + pos);
-					boolean hit = p.hitEntity != null;
-					drawCrosshairAt(mc, pos.x, pos.y, hit ? 0 : 1, hit ? 1 : 0, 0);
-					zc.zoomTowards(new Vec3(p.x, p.y, p.z));
-					if (!colissionDrawn && !hit && autoAim
-							&& shouldAutoaim(heldItem)) {
-						aimAtCloseEntity(pos, resolution, colissionSolver);
-					}
-					colissionDrawn = true;
-				}
-				if (!colissionDrawn) {
-					int x = resolution.getScaledWidth() / 2;
-					int y = resolution.getScaledHeight() / 2;
-					drawCrosshairAt(mc, x, y, .6f, .6f, .6f);
-				}
-				// if (count == 0 || !colissionDrawn) {
-				// zc.apply(0);
-				// zc.reset();
-				// } else {
-				// float f1 = count / 20.0F;
-				//
-				// if (f1 > 1.0F) {
-				// f1 = 1.0F;
-				// } else {
-				// f1 *= f1;
-				// }
-				// zc.apply(f1);
-				// }
-				return false;
-			} else {
-				return super.showCrosshair();
-			}
+                GlStateManager.pushMatrix();
+                mc.fontRendererObj.drawString(
+                        text,
+                        resolution.getScaledWidth() / 2 + 10,
+                        resolution.getScaledHeight() / 2 - 4,
+                        0xFFFFFF
+                );
+                GlStateManager.popMatrix();
+                break;
+            }
+        }
+    }
 
-		} else {
-			return super.showCrosshair();
-		}
+    private void renderCustomCrosshair(ScaledResolution resolution) {
+        if (!TrajectoryState) return;
+
+        EntityPlayerSP player = mc.thePlayer;
+        ItemStack heldItem = player.getHeldItem();
+        ColissionSolver solver = ColissionSolver.forItem(heldItem, mc);
+
+        if (solver == null) return;
+
+        List<ColissionData> collisions = solver.computeCurrentColissionPoints();
+        boolean drawn = false;
+
+        for (ColissionData p : collisions) {
+            Pos2 pos = getScreenPosition(p.x, p.y + player.getEyeHeight(), p.z, resolution);
+            boolean hit = p.hitEntity != null;
+            drawAimIndicator(pos.x, pos.y, hit);
+            if (!drawn && !hit && autoAim && shouldAutoAim(heldItem)) {
+                handleAutoAim(pos, resolution, solver);
+            }
+            drawn = true;
+        }
+
+        if (!drawn) {
+            drawAimIndicator(resolution.getScaledWidth()/2, resolution.getScaledHeight()/2, false);
+        }
+    }
+
+    private void drawCollisionBox(float partialTicks) {
+        if (RayData.trajectory.isEmpty()) return;
+
+        Vec3 lastPos = RayData.trajectory.get(RayData.trajectory.size() - 1);
+        BlockPos endBlock = new BlockPos(lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
+        drawBlockHighlight(endBlock, partialTicks);
+    }
+
+    private boolean shouldAutoAim(ItemStack item) {
+        return item.getItem() != Items.bow || mc.thePlayer.getItemInUseCount() > 0;
+    }
+
+    private void handleAutoAim(Pos2 targetPos, ScaledResolution res, ColissionSolver solver) {
+        List<Entity> entities = mc.theWorld.getEntitiesWithinAABB(
+                Entity.class,
+                mc.thePlayer.getEntityBoundingBox().expand(200, 100, 200)
+        );
+
+        ArrayList<CloseEntity> candidates = new ArrayList();
+        for (Entity e : entities) {
+            if (e.canBeCollidedWith() && e != mc.thePlayer) {
+                Pos2 screenPos = getScreenPosition(e.posX, e.posY, e.posZ, res);
+                double dist = targetPos.distanceTo(screenPos);
+                if (dist < 100) candidates.add(new CloseEntity(e, dist));
+            }
+        }
+        Collections.sort(candidates);
+
+        ReverseBowSolver aimHelper = new ReverseBowSolver(
+                solver.getGravity(),
+                solver.getVelocity()
+        );
+
+        for (CloseEntity candidate : candidates) {
+            Vec3 aimVector = aimHelper.getLookForTarget(candidate.entity);
+            List<ColissionData> results = solver.computeColissionWithLook(aimVector);
+            if (!results.isEmpty() && results.get(0).hitEntity == candidate.entity) {
+                adjustPlayerLook(aimVector);
+                break;
+            }
+        }
     }
 
 
-	private void checkForMatrixStealing() {
-		try {
-			// getDeclaredField("renderContainer");
-			for (Field field : RenderGlobal.class.getDeclaredFields()) {
-				if (field.getType() != ChunkRenderContainer.class)
-					continue;
+    private void adjustPlayerLook(Vec3 lookDir) {
+        double dx = lookDir.xCoord;
+        double dz = lookDir.zCoord;
+        double dy = lookDir.yCoord;
 
-				field.setAccessible(true);
-				Object current = field.get(mc.renderGlobal);
-				if (!(current instanceof MatrixCatcher)) {
-					catcher = new MatrixCatcher((ChunkRenderContainer) current);
-					field.set(mc.renderGlobal, catcher);
-				}
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-	}
+        float yaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90f;
+        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx*dx + dz*dz)));
 
-	private boolean shouldAutoaim(ItemStack heldItem) {
-		int count = mc.thePlayer.getItemInUseCount();
-		return heldItem.getItem() != Items.bow || count > 0;
-	}
+        float yawDiff = yaw - mc.thePlayer.rotationYaw;
+        float pitchDiff = pitch - mc.thePlayer.rotationPitch;
 
-	private void drawCrosshairAt(Minecraft mc, int x, int y, float r, float g,
-			float b) {
-		//GlStateManager.tryBlendFuncSeparate(775, 769, 1, 0);
-				GlStateManager.enableBlend();
-				GlStateManager.enableAlpha();
-				drawTexturedModalRect(x - 7, y - 7, 0, 0, 16, 16, r, g, b);
-		// mc.getTextureManager().bindTexture(Gui.icons);
-		// GL11.glEnable(GL11.GL_BLEND);
-		// drawTexturedModalRect(x - 7, y - 7, 0, 0, 16, 16, r, g, b);
-		// GL11.glDisable(GL11.GL_BLEND);
-	}
+        mc.thePlayer.setAngles(yawDiff/0.15f, -pitchDiff/0.15f);
+    }
 
-	/**
-	 * Draws a textured rectangle at the stored z-value. Args: x, y, u, v,
-	 * width, height given CrossHairState in configuration file is set to true
-	 * 
-	 * @param b
-	 * @param g
-	 * @param r
-	 */
-	public void drawTexturedModalRect(int par1, int par2, int par3, int par4,
-			int par5, int par6, float r, float g, float b) {
+    private void drawBlockHighlight(BlockPos pos, float partialTicks) {
+        Entity viewer = Minecraft.getMinecraft().getRenderViewEntity();
+        double viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks;
+        double viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks;
+        double viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks;
 
-		// Got rid of the gray box cause I don't think anyone would like it
-		// If you do, you're weird, but you can change the alpha value to 0.5F if you really want it
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.disableTexture2D();
+        GlStateManager.depthMask(false);
+        GL11.glLineWidth(2.0f);
 
-		float f = 0.00390625F;
-		float f1 = 0.00390625F;
-		WorldRenderer vertexBuffer = Tessellator.getInstance().getWorldRenderer();
-		vertexBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		vertexBuffer.pos(par1 + 0, par2 + par6, this.zLevel).tex((par3 + 0) * f, (par4 + par6) * f1).color(r, g, b, 0f).endVertex();
-		vertexBuffer.pos(par1 + par5, par2 + par6, this.zLevel).tex((par3 + par5) * f, (par4 + par6) * f1).color(r, g, b, 0f).endVertex();
-		vertexBuffer.pos(par1 + par5, par2 + 0, this.zLevel).tex((par3 + par5) * f, (par4 + 0) * f1).color(r, g, b, 0f).endVertex();
-		vertexBuffer.pos(par1 + 0, par2 + 0, this.zLevel).tex((par3 + 0) * f, (par4 + 0) * f1).color(r, g, b, 0f).endVertex();
-		Tessellator.getInstance().draw();
-	}
+        // Set color
+        GL11.glColor4f(red, green, blue, alpha);
 
-	public Pos2 getPositionOnScreen(Minecraft mc, double x, double y, double z,
-			ScaledResolution resolution) {
-		Vec3 player = mc.getRenderViewEntity().getPositionEyes(partialTicks);
-		viewPort.rewind();
-		viewPort.put(0);
-		viewPort.put(0);
-		viewPort.put(resolution.getScaledWidth());
-		viewPort.put(resolution.getScaledHeight());
-		viewPort.rewind();
+        // Draw box
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 
-		win_pos.rewind();
-		modelBuffer.rewind();
-		projectionBuffer.rewind();
-		GLU.gluProject((float) (x - player.xCoord),
-				(float) (y - player.yCoord), (float) (z - player.zCoord),
-				modelBuffer, projectionBuffer, viewPort, win_pos);
+        AxisAlignedBB box = new AxisAlignedBB(
+                pos.getX(), pos.getY(), pos.getZ(),
+                pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
+        ).expand(0.002, 0.002, 0.002)
+                .offset(-viewerX, -viewerY, -viewerZ);
 
-		win_pos.rewind();
-		int sx = (int) win_pos.get();
-		int sy = resolution.getScaledHeight() - (int) win_pos.get();
+        // Draw outline
+        worldrenderer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
 
-		if (win_pos.get() < 1) {
-			return new Pos2(sx, sy);
-		} else {
-			return new Pos2(-100, -100);
-		}
-	}
+        // Bottom
+        worldrenderer.pos(box.minX, box.minY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.minY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.minY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.minY, box.maxZ).endVertex();
+        worldrenderer.pos(box.maxX, box.minY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.minY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.minY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.minY, box.minZ).endVertex();
 
-	private static class CloseEntity implements Comparable<CloseEntity> {
-		private final Entity entity;
-		private final double distance;
+        // Top
+        worldrenderer.pos(box.minX, box.maxY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.maxY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.maxY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.maxY, box.maxZ).endVertex();
+        worldrenderer.pos(box.maxX, box.maxY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.maxY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.maxY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.maxY, box.minZ).endVertex();
 
-		public CloseEntity(Entity entity, double distance) {
-			super();
-			this.entity = entity;
-			this.distance = distance;
-		}
+        // Verticals
+        worldrenderer.pos(box.minX, box.minY, box.minZ).endVertex();
+        worldrenderer.pos(box.minX, box.maxY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.minY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.maxY, box.minZ).endVertex();
+        worldrenderer.pos(box.maxX, box.minY, box.maxZ).endVertex();
+        worldrenderer.pos(box.maxX, box.maxY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.minY, box.maxZ).endVertex();
+        worldrenderer.pos(box.minX, box.maxY, box.maxZ).endVertex();
 
-		@Override
-		public int compareTo(CloseEntity o) {
-			return Double.compare(distance, o.distance);
-		}
+        tessellator.draw();
 
-		@Override
-		public String toString() {
-			return "CloseEntity [entity=" + entity + ", distance=" + distance
-					+ "]";
-		}
+        // Reset GL states
+        GL11.glLineWidth(1.0F);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
 
-	}
+    private void drawAimIndicator(int x, int y, boolean hit) {
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.enableAlpha();
 
-	public void aimAtCloseEntity(Pos2 toScreenPos, ScaledResolution resolution,
-			ColissionSolver colissionSolver) {
-		AxisAlignedBB bbox = mc.thePlayer.getEntityBoundingBox();
-		List<Entity> entities = mc.theWorld.getEntitiesWithinAABB(Entity.class,
-				bbox.expand(200, 100, 200));
+        float r = hit ? 1 : 0;
+        float g = hit ? 0 : 1;
+        drawCustomCrosshair(x - 7, y - 7, r, g, 0);
 
-		ArrayList<CloseEntity> nearEntities = new ArrayList<CloseEntity>();
+        GlStateManager.disableBlend();
+        GlStateManager.popMatrix();
+    }
 
-		// System.out.println("Scanning entites: " + entities.size());
-		for (Entity e : entities) {
-			if (e.canBeCollidedWith()
-					&& e != Minecraft.getMinecraft().thePlayer) {
-				Pos2 onScreen = getPositionOnScreen(mc, e.posX, e.posY, e.posZ,
-						resolution);
-				double d = toScreenPos.distanceTo(onScreen);
-				if (d < 100) {
-					// System.out.println("Close entity.");
-					nearEntities.add(new CloseEntity(e, d));
-				}
-			}
-		}
-		Collections.sort(nearEntities);
+    private Pos2 getScreenPosition(double x, double y, double z, ScaledResolution res) {
+        Vec3 eyes = mc.getRenderViewEntity().getPositionEyes(partialTicks);
+        viewPort.put(0, 0).put(1, 0).put(2, res.getScaledWidth()).put(3, res.getScaledHeight());
 
-		ReverseBowSolver rbs = new ReverseBowSolver(
-				colissionSolver.getGravity(), colissionSolver.getVelocity());
+        GLU.gluProject(
+                (float)(x - eyes.xCoord),
+                (float)(y - eyes.yCoord),
+                (float)(z - eyes.zCoord),
+                modelBuffer,
+                projectionBuffer,
+                viewPort,
+                win_pos
+        );
 
-		for (CloseEntity e : nearEntities) {
-			// System.out.println("Try to hit " + e);
-			Vec3 look = rbs.getLookForTarget(e.entity);
-			ArrayList<ColissionData> foundColissions = colissionSolver
-					.computeColissionWithLook(look);
-			if (foundColissions.size() > 0
-					&& foundColissions.get(0).hitEntity == e.entity) {
-				// System.out.println("Positive: " + e.entity);
-				lookAt(look);
-				break;
-			} else {
-				// System.out.println("Negative: " + e + ", got: "
-				// + foundColissions);
-			}
-		}
-	}
+        return new Pos2(
+                (int)win_pos.get(0),
+                res.getScaledHeight() - (int)win_pos.get(1)
+        );
+    }
 
-	private void lookAt(Vec3 look) {
-		final double d0 = look.xCoord;
-		final double d1 = look.zCoord;
-		final double d2 = look.yCoord;
-		final double d3 = d0 * d0 + d2 * d2 + d1 * d1;
+    private void drawCustomCrosshair(int x, int y, float r, float g, float b) {
+        // Bind the Minecraft GUI texture atlas
+        mc.getTextureManager().bindTexture(Gui.icons);
 
-		if (d3 >= 2.500000277905201E-7D) {
-			final float rotationYaw = mc.thePlayer.rotationYaw;
-			final float rotationPitch = mc.thePlayer.rotationPitch;
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
-			final float yaw = (float) (Math.atan2(d1, d0) * 180.0D / Math.PI) - 90.0F;
-			final float pitch = (float) -(Math.atan2(d2,
-					Math.sqrt(d0 * d0 + d1 * d1)) * 180.0D / Math.PI);
-			mc.thePlayer.setAngles((yaw - rotationYaw) / 0.15f,
-					-(pitch - rotationPitch) / 0.15f);
-		}
-	}
+        float uScale = 0.00390625f;
+        float vScale = 0.00390625f;
 
-	public void stealProjectionMatrix() {
-		modelBuffer.rewind();
-		projectionBuffer.rewind();
-		GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelBuffer);
-		GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projectionBuffer);
-	}
+        wr.pos(x, y + 16, 0)
+                .tex(0 * uScale, 16 * vScale)
+                .color(r, g, b, 1f).endVertex();
+        wr.pos(x + 16, y + 16, 0)
+                .tex(16 * uScale, 16 * vScale)
+                .color(r, g, b, 1f).endVertex();
+        wr.pos(x + 16, y, 0)
+                .tex(16 * uScale, 0 * vScale)
+                .color(r, g, b, 1f).endVertex();
+        wr.pos(x, y, 0)
+                .tex(0 * uScale, 0 * vScale)
+                .color(r, g, b, 1f).endVertex();
 
-	public class MatrixCatcher extends ChunkRenderContainer {
-		ChunkRenderContainer base;
+        Tessellator.getInstance().draw();
+    }
 
-		public void addRenderChunk(RenderChunk p_178002_1_,
-				EnumWorldBlockLayer p_178002_2_) {
-			base.addRenderChunk(p_178002_1_, p_178002_2_);
-		}
+    private static class CloseEntity implements Comparable<CloseEntity> {
+        final Entity entity;
+        final double distance;
 
-		public boolean equals(Object obj) {
-			return base.equals(obj);
-		}
+        CloseEntity(Entity e, double d) {
+            entity = e;
+            distance = d;
+        }
 
-		public int hashCode() {
-			return base.hashCode();
-		}
-
-		public void initialize(double p_178004_1_, double p_178004_3_,
-				double p_178004_5_) {
-			base.initialize(p_178004_1_, p_178004_3_, p_178004_5_);
-		}
-
-		public void preRenderChunk(RenderChunk p_178003_1_) {
-			base.preRenderChunk(p_178003_1_);
-		}
-
-		public void renderChunkLayer(EnumWorldBlockLayer p_178001_1_) {
-			if (catcher == this) {
-				stealProjectionMatrix();
-			}
-			base.renderChunkLayer(p_178001_1_);
-		}
-
-		public String toString() {
-			return base.toString();
-		}
-
-		public MatrixCatcher(ChunkRenderContainer base) {
-			super();
-			this.base = base;
-		}
-	}
+        @Override
+        public int compareTo(CloseEntity o) {
+            return Double.compare(distance, o.distance);
+        }
+    }
 
 }

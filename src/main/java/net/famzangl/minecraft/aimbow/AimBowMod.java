@@ -66,6 +66,7 @@ public class AimBowMod {
 
 		ClientCommandHandler.instance.registerCommand(new AimBowCommand());
 		MinecraftForge.EVENT_BUS.register(this);
+		MinecraftForge.EVENT_BUS.register(new AimbowGui());
 
 		red = config.get("Color", "Red", 255).getInt();
 		green = config.get("Color", "Green", 255).getInt();
