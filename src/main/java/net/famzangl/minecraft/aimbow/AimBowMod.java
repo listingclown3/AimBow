@@ -39,6 +39,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.File;
 
+import static net.famzangl.minecraft.aimbow.AimbowGui.renderTrajectory;
 import static net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver.force;
 
 @Mod(modid="aimbow-mod", name = "AimBow", version = "0.1.0")
@@ -97,39 +98,7 @@ public class AimBowMod {
 		}
 
 		if (TrajectoryState) {
-			if (!(force <= 0.2)) { // should make customizable
-
-				GL11.glPushMatrix();
-				GL11.glTranslated(-Minecraft.getMinecraft().getRenderManager().viewerPosX,
-						-Minecraft.getMinecraft().getRenderManager().viewerPosY,
-						-Minecraft.getMinecraft().getRenderManager().viewerPosZ);
-
-				GL11.glDisable(GL11.GL_TEXTURE_2D);
-				GL11.glDisable(GL11.GL_LIGHTING);
-				GL11.glEnable(GL11.GL_BLEND);
-				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-				GL11.glLineWidth(width);
-
-				Tessellator tessellator = Tessellator.getInstance();
-				WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-
-				worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-
-				for (Vec3 point : RayData.trajectory) {
-					worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord).color(red, green, blue, alpha).endVertex();
-				}
-
-				tessellator.draw();
-
-				GL11.glDisable(GL11.GL_BLEND);
-				GL11.glEnable(GL11.GL_LIGHTING);
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-				GL11.glPopMatrix();
-				RayData.trajectory.clear();
-
-
-			}
+			RayData.trajectory.clear();
 		}
 	}
 

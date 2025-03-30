@@ -69,33 +69,49 @@ public class AimbowGui {
         drawCollisionBox(event.partialTicks);
     }
 
-    private void renderTrajectory(float partialTicks) {
-        if (force <= 0.2) return;
+    public static void renderTrajectory(float partialTicks) {
+        if (force <= 0.2 || RayData.trajectory.isEmpty()) return;
 
         GlStateManager.pushMatrix();
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableLighting();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glLineWidth(width);
+        try {
+            // Add viewer offset transformation
+            GlStateManager.translate(
+                    -Minecraft.getMinecraft().getRenderManager().viewerPosX,
+                    -Minecraft.getMinecraft().getRenderManager().viewerPosY,
+                    -Minecraft.getMinecraft().getRenderManager().viewerPosZ
+            );
 
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-        worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            GlStateManager.disableTexture2D();
+            GlStateManager.disableLighting();
+            GlStateManager.enableBlend();
+            GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glLineWidth(width);
 
-        for (Vec3 point : RayData.trajectory) {
-            worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord)
-                    .color(red, green, blue, alpha)
-                    .endVertex();
+            Tessellator tessellator = Tessellator.getInstance();
+            WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+
+            worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+
+            // Only draw continuous trajectory points
+            for (int i = 0; i < RayData.trajectory.size(); i++) {
+                Vec3 point = RayData.trajectory.get(i);
+                // Skip collision point if it's the last entry
+                if (i == RayData.trajectory.size() - 1 &&
+                        point.equals(RayData.trajectory.get(RayData.trajectory.size() - 1))) {
+                    continue;
+                }
+                worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord)
+                        .color(red, green, blue, alpha)
+                        .endVertex();
+            }
+            tessellator.draw();
+        } finally {
+            GL11.glLineWidth(1.0F);
+            GlStateManager.enableLighting();
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
         }
-
-        tessellator.draw();
-
-        GL11.glLineWidth(width);
-        GlStateManager.enableLighting();
-        GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
     }
 
     private void renderBlockDistance(ScaledResolution resolution) {
