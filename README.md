@@ -16,7 +16,7 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 - Coming soon on my [channel](https://www.youtube.com/channel/UCyjficiLV37wXhT3VBkp0ew)!!!
 
 ## Demonstration video
-[Latest Video](https://youtu.be/P63V_68TwI0)
+[Latest Video](https://youtu.be/P63V_68TwI0)<br>
 [Video](https://youtu.be/TnqWZ5gxEG4)
 
 ## Todo
