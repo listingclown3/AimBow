@@ -23,7 +23,6 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 - More customizability
 - Explain the math
 - Fix the mcmod.info
-- Fix overlay rendering (messes with skyblock mod maps, etc.)
 - Auto EnderClutch
 - Auto PotionHeal
 - Auto PotionDamage
