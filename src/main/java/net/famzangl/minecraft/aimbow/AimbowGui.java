@@ -54,7 +54,7 @@ public class AimbowGui {
 
         if (TrajectoryState) {
             if (blockDistanceState) {
-                renderBlockDistance(resolution);
+                renderDistanceOverlay(resolution);
             }
         }
 
@@ -70,15 +70,30 @@ public class AimbowGui {
     }
 
     public static void renderTrajectory(float partialTicks) {
+        // Clear trajectory at start of each render cycle
+        RayData.trajectory.clear();
+
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return;
+
+        EntityPlayerSP player = mc.thePlayer;
+        ItemStack heldItem = player.getHeldItem();
+        ColissionSolver solver = ColissionSolver.forItem(heldItem, mc);
+
+        if (solver == null) return;
+
+        // Compute trajectory for current item
+        List<ColissionData> collisions = solver.computeCurrentColissionPoints();
+
         if (force <= 0.2 || RayData.trajectory.isEmpty()) return;
 
         GlStateManager.pushMatrix();
         try {
             // Add viewer offset transformation
             GlStateManager.translate(
-                    -Minecraft.getMinecraft().getRenderManager().viewerPosX,
-                    -Minecraft.getMinecraft().getRenderManager().viewerPosY,
-                    -Minecraft.getMinecraft().getRenderManager().viewerPosZ
+                    -mc.getRenderManager().viewerPosX,
+                    -mc.getRenderManager().viewerPosY,
+                    -mc.getRenderManager().viewerPosZ
             );
 
             GlStateManager.disableTexture2D();
@@ -92,16 +107,18 @@ public class AimbowGui {
 
             worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 
-            // Only draw continuous trajectory points
+            // Draw trajectory points - fixed to prevent extra lines
             for (int i = 0; i < RayData.trajectory.size(); i++) {
                 Vec3 point = RayData.trajectory.get(i);
-                // Skip collision point if it's the last entry
-                if (i == RayData.trajectory.size() - 1 &&
-                        point.equals(RayData.trajectory.get(RayData.trajectory.size() - 1))) {
-                    continue;
-                }
+
+                // Convert color values from 0-255 range to 0.0-1.0 range
+                float r = red / 255.0f;
+                float g = green / 255.0f;
+                float b = blue / 255.0f;
+                float a = alpha / 255.0f;
+
                 worldRenderer.pos(point.xCoord, point.yCoord, point.zCoord)
-                        .color(red, green, blue, alpha)
+                        .color(r, g, b, a)
                         .endVertex();
             }
             tessellator.draw();
@@ -114,26 +131,38 @@ public class AimbowGui {
         }
     }
 
-    private void renderBlockDistance(ScaledResolution resolution) {
-        for (Vec3 point : RayData.trajectory) {
-            BlockPos blockPos = new BlockPos(point.xCoord, point.yCoord, point.zCoord);
-            IBlockState blockState = mc.theWorld.getBlockState(blockPos);
+    private void renderDistanceOverlay(ScaledResolution resolution) {
+        EntityPlayerSP player = mc.thePlayer;
+        ItemStack heldItem = player.getHeldItem();
+        ColissionSolver solver = ColissionSolver.forItem(heldItem, mc);
 
-            if (blockState.getBlock() != Blocks.air) {
-                Vec3 playerPos = mc.thePlayer.getPositionVector();
-                double distance = playerPos.distanceTo(new Vec3(blockPos));
-                String text = String.format("Distance: %.1f", distance);
+        if (solver == null) return;
 
-                GlStateManager.pushMatrix();
-                mc.fontRendererObj.drawString(
-                        text,
-                        resolution.getScaledWidth() / 2 + 10,
-                        resolution.getScaledHeight() / 2 - 4,
-                        0xFFFFFF
-                );
-                GlStateManager.popMatrix();
-                break;
+        List<ColissionData> collisions = solver.computeCurrentColissionPoints();
+
+        if (!collisions.isEmpty()) {
+            ColissionData firstHit = collisions.get(0);
+            Vec3 playerPos = player.getPositionVector();
+            Vec3 hitPos = new Vec3(firstHit.x, firstHit.y, firstHit.z);
+            double distance = playerPos.distanceTo(hitPos);
+
+            String text;
+            if (firstHit.hitEntity != null) {
+                // Hit an entity
+                text = String.format("Entity Distance: %.1f", distance);
+            } else {
+                // Hit a block
+                text = String.format("Block Distance: %.1f", distance);
             }
+
+            GlStateManager.pushMatrix();
+            mc.fontRendererObj.drawString(
+                    text,
+                    resolution.getScaledWidth() / 2 + 10,
+                    resolution.getScaledHeight() / 2 - 4,
+                    0xFFFFFF
+            );
+            GlStateManager.popMatrix();
         }
     }
 
@@ -207,7 +236,6 @@ public class AimbowGui {
         }
     }
 
-
     private void adjustPlayerLook(Vec3 lookDir) {
         double dx = lookDir.xCoord;
         double dz = lookDir.zCoord;
@@ -235,8 +263,13 @@ public class AimbowGui {
         GlStateManager.depthMask(false);
         GL11.glLineWidth(2.0f);
 
-        // Set color
-        GL11.glColor4f(red, green, blue, alpha);
+        // Convert color values from 0-255 range to 0.0-1.0 range
+        float r = red / 255.0f;
+        float g = green / 255.0f;
+        float b = blue / 255.0f;
+        float a = alpha / 255.0f;
+
+        GL11.glColor4f(r, g, b, a);
 
         // Draw box
         Tessellator tessellator = Tessellator.getInstance();
@@ -365,5 +398,4 @@ public class AimbowGui {
             return Double.compare(distance, o.distance);
         }
     }
-
 }

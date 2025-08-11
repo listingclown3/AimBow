@@ -40,7 +40,6 @@ import org.lwjgl.opengl.GL11;
 import java.io.File;
 
 import static net.famzangl.minecraft.aimbow.AimbowGui.renderTrajectory;
-import static net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver.force;
 
 @Mod(modid="aimbow-mod", name = "AimBow", version = "0.1.0")
 public class AimBowMod {
@@ -77,7 +76,6 @@ public class AimBowMod {
 		crossHairState = config.get("General", "CrossHairState", false).getBoolean();
 		blockDistanceState = config.get("General", "HighlightLandingBlockState", false).getBoolean();
 		TrajectoryState = config.get("General", "Trajectory", true).getBoolean();
-
 	}
 
 	public static String getVersion() {
@@ -91,17 +89,7 @@ public class AimBowMod {
 		}
 	}
 
-	@SubscribeEvent
-	public void onRenderWorldLast(RenderWorldLastEvent event) {
-		if (Minecraft.getMinecraft().getRenderViewEntity() == null) {
-			return;
-		}
-
-		if (TrajectoryState) {
-			RayData.trajectory.clear();
-		}
-	}
-
+	// Removed the redundant onRenderWorldLast method that was clearing trajectory
 
 	public void drawCollisionBox(float partialTicks) {
 		if (!RayData.trajectory.isEmpty()) {
@@ -115,7 +103,6 @@ public class AimBowMod {
 			drawBlockHighlight(endBlock, partialTicks);
 		} else {
 			return;
-
 		}
 	}
 
@@ -132,8 +119,13 @@ public class AimBowMod {
 		GlStateManager.depthMask(false);
 		GL11.glLineWidth(2.0f);
 
-		// Set color
-		GL11.glColor4f(red, green, blue, alpha);
+		// Convert color values from 0-255 range to 0.0-1.0 range
+		float r = red / 255.0f;
+		float g = green / 255.0f;
+		float b = blue / 255.0f;
+		float a = alpha / 255.0f;
+
+		GL11.glColor4f(r, g, b, a);
 
 		// Draw box
 		Tessellator tessellator = Tessellator.getInstance();
@@ -187,6 +179,4 @@ public class AimBowMod {
 		GlStateManager.disableBlend();
 		GlStateManager.popMatrix();
 	}
-
-
 }

@@ -17,6 +17,7 @@
 package net.famzangl.minecraft.aimbow.aiming;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver;
 import net.famzangl.minecraft.aimbow.aiming.Fishing.FishingColissionSolver;
@@ -71,8 +72,10 @@ public abstract class ColissionSolver {
 	private void generateRays(Entity entity) {
 		simulated.clear();
 		RayData data = generateRayData();
-		data.shootFrom(entity);
-		simulated.add(data);
+		if (data != null) {
+			data.shootFrom(entity);
+			simulated.add(data);
+		}
 	}
 
 	public ArrayList<ColissionData> computeCurrentColissionPoints() {
@@ -86,8 +89,10 @@ public abstract class ColissionSolver {
 		colissions = new ArrayList<ColissionData>();
 		simulated.clear();
 		RayData data = generateRayData();
-		data.shootFromTowards(shootingEntity, look);
-		simulated.add(data);
+		if (data != null) {
+			data.shootFromTowards(shootingEntity, look);
+			simulated.add(data);
+		}
 		run();
 		return colissions;
 	}
@@ -103,23 +108,28 @@ public abstract class ColissionSolver {
 	public static ColissionSolver forItem(ItemStack heldItem, Minecraft mc) {
 		if (heldItem == null) {
 			return null;
-		} else if (heldItem.getItem() == Items.snowball || heldItem.getItem() == Items.egg || heldItem.getItem() == Items.ender_pearl) {
+		} else if (heldItem.getItem() == Items.snowball ||
+				heldItem.getItem() == Items.egg ||
+				heldItem.getItem() == Items.ender_pearl) {
 			return new ThrowableColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
-		} else if (heldItem.getItem() == Items.experience_bottle || (heldItem.getItem() == Items.potionitem && ItemPotion.isSplash(heldItem.getMetadata()))) { // check for throwable potion metadata / exp bottles
+		} else if (heldItem.getItem() == Items.experience_bottle ||
+				(heldItem.getItem() == Items.potionitem && ItemPotion.isSplash(heldItem.getMetadata()))) {
 			return new PotionColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		} else if (heldItem.getItem() == Items.bow) {
 			return new BowColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		} else if (heldItem.getItem() == Items.fishing_rod) {
 			return new FishingColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
-
+		} else {
+			// Default fallback for any other throwable items
+			// This ensures trajectory works for items not explicitly supported
+			return new ThrowableColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		}
-		return null;
 	}
 
 	public float getGravity() {
-		return generateRayData().getGravity();
+		RayData data = generateRayData();
+		return data != null ? data.getGravity() : 0.03f;
 	}
 
 	public abstract float getVelocity();
-
 }
