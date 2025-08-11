@@ -78,9 +78,13 @@ public class AimbowGui {
 
         EntityPlayerSP player = mc.thePlayer;
         ItemStack heldItem = player.getHeldItem();
-        ColissionSolver solver = ColissionSolver.forItem(heldItem, mc);
 
-        if (solver == null) return;
+        // Check if we have a valid solver for the held item BEFORE doing anything
+        ColissionSolver solver = ColissionSolver.forItem(heldItem, mc);
+        if (solver == null) {
+            // No valid projectile item, don't render trajectory
+            return;
+        }
 
         // Compute trajectory for current item
         List<ColissionData> collisions = solver.computeCurrentColissionPoints();
@@ -194,7 +198,14 @@ public class AimbowGui {
     }
 
     private void drawCollisionBox(float partialTicks) {
-        if (RayData.trajectory.isEmpty()) return;
+        // Only draw collision box if we have a valid projectile item
+        EntityPlayerSP player = mc.thePlayer;
+        if (player == null) return;
+
+        ItemStack heldItem = player.getHeldItem();
+        ColissionSolver solver = ColissionSolver.forItem(heldItem, mc);
+
+        if (solver == null || RayData.trajectory.isEmpty()) return;
 
         Vec3 lastPos = RayData.trajectory.get(RayData.trajectory.size() - 1);
         BlockPos endBlock = new BlockPos(lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
@@ -393,7 +404,6 @@ public class AimbowGui {
             distance = d;
         }
 
-        @Override
         public int compareTo(CloseEntity o) {
             return Double.compare(distance, o.distance);
         }

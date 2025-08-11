@@ -122,7 +122,7 @@ public abstract class ColissionSolver {
 		} else {
 			// Default fallback for any other throwable items
 			// This ensures trajectory works for items not explicitly supported
-			return new ThrowableColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
+			return null;
 		}
 	}
 
