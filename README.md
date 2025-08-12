@@ -13,11 +13,12 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 
 ## Explaining the Math
 
-- Coming soon on my [channel](https://www.youtube.com/channel/UCyjficiLV37wXhT3VBkp0ew)!!!
+- [Put this on 2x Speed Please]([https://www.youtube.com/channel/UCyjficiLV37wXhT3VBkp0ew](https://www.youtube.com/watch?v=IVCrKG-963A))!!!
 
 ## Demonstration video
 [Latest Video](https://youtu.be/P63V_68TwI0)<br>
-[Video](https://youtu.be/TnqWZ5gxEG4)
+[Video](https://youtu.be/TnqWZ5gxEG4)<br>
+[Code/Math Breakdown](https://www.youtube.com/watch?v=IVCrKG-963A)
 
 ## Todo
 - Smart autoaiming (predicts how to hit entity based on its speed, direction, etc)
