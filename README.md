@@ -12,7 +12,7 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 - Block distance (works sometimes)
 
 ## Explaining the Math
-
+- [Script/Explanation][https://cdn.chrisccluk.live/files/misc/aimbow-code-explanation.pdf]
 - [Put this on 2x Speed Please]([https://www.youtube.com/channel/UCyjficiLV37wXhT3VBkp0ew](https://www.youtube.com/watch?v=IVCrKG-963A))!!!
 
 ## Demonstration video
