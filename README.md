@@ -1,7 +1,7 @@
 ## My fork
 working on adding ender pearls
 :)
-
+All credit goes to the original programmer whos repository can be found [here](https://github.com/listingclown3/AimBow)
 
 
 

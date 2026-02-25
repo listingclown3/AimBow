@@ -14,9 +14,12 @@ import static net.famzangl.minecraft.aimbow.AimBowMod.TrajectoryState;
 public class AimBowController {
 	protected static final KeyBinding autoAimKey = new KeyBinding("Auto aim",
 			Keyboard.getKeyIndex("Y"), "AimBow");
+	protected static final KeyBinding toggleTrajectoryKey = new KeyBinding("Toggle Trajectory",
+			Keyboard.getKeyIndex("J"), "AimBow");
 
 	static {
 		ClientRegistry.registerKeyBinding(autoAimKey);
+		ClientRegistry.registerKeyBinding(toggleTrajectoryKey);
 	}
 
 	private AimbowGui gui;
@@ -43,6 +46,10 @@ public class AimBowController {
 		if (autoAimKey.isPressed()) {
 			handleAutoAimToggle();
 		}
+		
+		if (toggleTrajectoryKey.isPressed()) {
+			handleTrajectoryToggle();
+		}
 	}
 
 	private void handleAutoAimToggle() {
@@ -52,6 +59,11 @@ public class AimBowController {
 		} else {
 			sendChatMessage("Enable Trajectory First! /aimbow");
 		}
+	}
+
+	private void handleTrajectoryToggle() {
+		AimBowMod.TrajectoryState = !AimBowMod.TrajectoryState;
+		sendChatMessage("Trajectory: " + (AimBowMod.TrajectoryState ? "On" : "Off"));
 	}
 
 	private void sendChatMessage(String message) {
