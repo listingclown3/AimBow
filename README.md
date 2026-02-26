@@ -4,6 +4,9 @@ Keybinds, fixed aimbot, easier to see trajectories
 
 All credit goes to the original programmer whos repository can be found [here](https://github.com/listingclown3/AimBow)
 
+## Showcase
+
+[CE v1.3](https://youtu.be/iK6PLwxdkgQ)
 
 
 ## AimBot 1.8.9
