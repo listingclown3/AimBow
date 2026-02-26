@@ -1,5 +1,9 @@
 ## My fork
 Keybinds, fixed aimbot, easier to see trajectories
+More accurate aimbot and trajectories
+highlight mobs you are aimed at
+
+to see my continuation check out my client [here](https://github.com/callenflynn/Strata-Client)
 
 
 All credit goes to the original programmer whos repository can be found [here](https://github.com/listingclown3/AimBow)
