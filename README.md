@@ -1,34 +1,4 @@
-## My fork
-Keybinds, fixed aimbot, easier to see trajectories
-More accurate aimbot and trajectories
-highlight mobs you are aimed at
-
-to see my continuation check out my client [here](https://github.com/callenflynn/Strata-Client)
-
-
-All credit goes to the original programmer whos repository can be found [here](https://github.com/listingclown3/AimBow)
-
-## Showcase
-VIDEO:
-[CE v1.3](https://youtu.be/iK6PLwxdkgQ)
-
-<img width="2880" height="1800" alt="image" src="https://github.com/user-attachments/assets/cce1a69b-d4fa-476c-aa60-6e80bb452c06" />
-J toggles trajectories
-Y toggles aimbot
-
-<img width="2877" height="558" alt="image" src="https://github.com/user-attachments/assets/bf39561f-4859-4997-b079-588133777a5c" />
-
-
-original creators website: https://chrisccluk.live/#projects/AimBow
-
-
-
-
-# old Readme
-
-
-
-## AimBot 1.8.9
+## AimBow 1.8.9
 
 Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original [Minebot/Aimbow](https://github.com/michaelzangl/minebot/tree/forge-1.8.9/AimBow) project
 <br>I simply added to the project with the help of LegoNinja48 and updated the compatibility to 1.8.9 (amazing wrapper!)
@@ -49,6 +19,18 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 [Latest Video](https://youtu.be/P63V_68TwI0)<br>
 [Video](https://youtu.be/TnqWZ5gxEG4)<br>
 [Code/Math Breakdown](https://www.youtube.com/watch?v=IVCrKG-963A)
+
+## Extra Showcase
+VIDEO:
+[CE v1.3](https://youtu.be/iK6PLwxdkgQ)
+CallenFlyn
+
+<img width="2880" height="1800" alt="image" src="https://github.com/user-attachments/assets/cce1a69b-d4fa-476c-aa60-6e80bb452c06" />
+J toggles trajectories
+Y toggles aimbot
+
+<img width="2877" height="558" alt="image" src="https://github.com/user-attachments/assets/bf39561f-4859-4997-b079-588133777a5c" />
+
 
 ## Todo
 - Smart autoaiming (predicts how to hit entity based on its speed, direction, etc)
