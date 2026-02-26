@@ -209,13 +209,13 @@ public class AimbowGui {
 
         if (solver == null || RayData.trajectory.isEmpty()) return;
 
-        // Get collisions to check if we hit a player
+        // Get collisions to check if we hit a player or mob
         List<ColissionData> collisions = solver.computeCurrentColissionPoints();
         
-        // Check if any collision is with a player and apply red tint
+        // Check if any collision is with a living entity and apply red tint
         for (ColissionData collision : collisions) {
-            if (collision.hitEntity instanceof EntityPlayer) {
-                drawPlayerTint((EntityPlayer) collision.hitEntity, partialTicks);
+            if (collision.hitEntity instanceof EntityLivingBase) {
+                drawEntityTint((EntityLivingBase) collision.hitEntity, partialTicks);
             }
         }
 
@@ -236,7 +236,7 @@ public class AimbowGui {
         drawBlockHighlight(endBlock, direction, partialTicks);
     }
 
-    private void drawPlayerTint(EntityPlayer targetPlayer, float partialTicks) {
+    private void drawEntityTint(EntityLivingBase targetEntity, float partialTicks) {
         Entity viewer = Minecraft.getMinecraft().getRenderViewEntity();
         double viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks;
         double viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks;
@@ -251,14 +251,19 @@ public class AimbowGui {
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 
-        // Get player's bounding box for tint visualization
-        double x = targetPlayer.lastTickPosX + (targetPlayer.posX - targetPlayer.lastTickPosX) * partialTicks - viewerX;
-        double y = targetPlayer.lastTickPosY + (targetPlayer.posY - targetPlayer.lastTickPosY) * partialTicks - viewerY;
-        double z = targetPlayer.lastTickPosZ + (targetPlayer.posZ - targetPlayer.lastTickPosZ) * partialTicks - viewerZ;
+        // Get entity's bounding box for tint visualization
+        double x = targetEntity.lastTickPosX + (targetEntity.posX - targetEntity.lastTickPosX) * partialTicks - viewerX;
+        double y = targetEntity.lastTickPosY + (targetEntity.posY - targetEntity.lastTickPosY) * partialTicks - viewerY;
+        double z = targetEntity.lastTickPosZ + (targetEntity.posZ - targetEntity.lastTickPosZ) * partialTicks - viewerZ;
+
+        // Get the entity's bounding box dimensions
+        AxisAlignedBB entityBox = targetEntity.getEntityBoundingBox();
+        double width = (entityBox.maxX - entityBox.minX) / 2;
+        double height = entityBox.maxY - entityBox.minY;
 
         AxisAlignedBB box = new AxisAlignedBB(
-                x - 0.4, y, z - 0.4,
-                x + 0.4, y + 1.8, z + 0.4
+                x - width, y, z - width,
+                x + width, y + height, z + width
         );
 
         // Draw red tinted box around player
@@ -368,10 +373,10 @@ public class AimbowGui {
         GlStateManager.disableTexture2D();
         GlStateManager.depthMask(false);
 
-        // Convert color values from 0-255 range to 0.0-1.0 range and invert
-        float r = 1.0f - (red / 255.0f);
-        float g = 1.0f - (green / 255.0f);
-        float b = 1.0f - (blue / 255.0f);
+        // Use red tint for block highlight
+        float r = 1.0f;
+        float g = 0.0f;
+        float b = 0.0f;
         float a = alpha / 255.0f;
 
         Tessellator tessellator = Tessellator.getInstance();
