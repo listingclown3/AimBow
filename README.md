@@ -5,8 +5,9 @@ Keybinds, fixed aimbot, easier to see trajectories
 All credit goes to the original programmer whos repository can be found [here](https://github.com/listingclown3/AimBow)
 
 ## Showcase
-
+VIDEO:
 [CE v1.3](https://youtu.be/iK6PLwxdkgQ)
+
 <img width="2880" height="1800" alt="image" src="https://github.com/user-attachments/assets/cce1a69b-d4fa-476c-aa60-6e80bb452c06" />
 J toggles trajectories
 Y toggles aimbot
