@@ -1,6 +1,7 @@
 ## My fork
-working on adding ender pearls
-:)
+Keybinds, fixed aimbot, easier to see trajectories
+
+
 All credit goes to the original programmer whos repository can be found [here](https://github.com/listingclown3/AimBow)
 
 
