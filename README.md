@@ -7,6 +7,12 @@ All credit goes to the original programmer whos repository can be found [here](h
 ## Showcase
 
 [CE v1.3](https://youtu.be/iK6PLwxdkgQ)
+<img width="2880" height="1800" alt="image" src="https://github.com/user-attachments/assets/cce1a69b-d4fa-476c-aa60-6e80bb452c06" />
+J toggles trajectories
+Y toggles aimbot
+
+<img width="2877" height="558" alt="image" src="https://github.com/user-attachments/assets/bf39561f-4859-4997-b079-588133777a5c" />
+
 
 
 ## AimBot 1.8.9
