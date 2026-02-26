@@ -15,6 +15,14 @@ Y toggles aimbot
 <img width="2877" height="558" alt="image" src="https://github.com/user-attachments/assets/bf39561f-4859-4997-b079-588133777a5c" />
 
 
+original creators website: https://chrisccluk.live/#projects/AimBow
+
+
+
+
+# old Readme
+
+
 
 ## AimBot 1.8.9
 
@@ -39,7 +47,6 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 [Code/Math Breakdown](https://www.youtube.com/watch?v=IVCrKG-963A)
 
 ## Todo
-- Smart autoaiming (predicts how to hit entity based on its speed, direction, etc)
 - More customizability
 - Explain the math
 - Fix the mcmod.info
