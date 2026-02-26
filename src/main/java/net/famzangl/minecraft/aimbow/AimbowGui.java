@@ -209,7 +209,19 @@ public class AimbowGui {
 
         Vec3 lastPos = RayData.trajectory.get(RayData.trajectory.size() - 1);
         BlockPos endBlock = new BlockPos(lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
-        drawBlockHighlight(endBlock, partialTicks);
+        
+        // Determine hit face from trajectory direction
+        Vec3 direction = null;
+        if (RayData.trajectory.size() >= 2) {
+            Vec3 prevPos = RayData.trajectory.get(RayData.trajectory.size() - 2);
+            direction = new Vec3(
+                lastPos.xCoord - prevPos.xCoord,
+                lastPos.yCoord - prevPos.yCoord,
+                lastPos.zCoord - prevPos.zCoord
+            );
+        }
+        
+        drawBlockHighlight(endBlock, direction, partialTicks);
     }
 
     private boolean shouldAutoAim(ItemStack item) {
