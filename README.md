@@ -22,17 +22,13 @@ Credit goes to [Michael Zang](https://github.com/michaelzangl) for the original 
 
 ## Todo
 - Smart autoaiming (predicts how to hit entity based on its speed, direction, etc)
-- More customizability
-- Explain the math
-- Fix the mcmod.info
-- Auto EnderClutch
-- Auto PotionHeal
-- Auto PotionDamage
-- Auto FishingHit
-- add flashback feature (when in motion save the projectile trajectory until trajectory is complete, that way recorrections can be made)
-   * set changeable amount of flashbacks (i.e, 5 predictions can be saved after shooting before the next one is created and the oldest is unrendered)
-
-* splash potion vs bottle o enchanting MIGHT have difference velocity values, etc. is changeable
+  1. static auto aim forward based on the immediate direction a player is moving at the release of the arrow
+  2. dynamic auto aim which accounts for different move paths and convolution of a path such like on a bridge (probably not needed)
+- Backward aim finder (recommended by melumi in which you can find where a player is looking and their trajectory)
+  1. could be quite computationally expensive depending on how we run this, but is feasible.
+- More customizability (will merge PR from Cal)
+  1. needs to have enderpearls and all other types of projectiles
+  2. needs to fix block highlighting (make this customizable)
 
 ## Suggestions
 
