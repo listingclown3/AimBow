@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.famzangl.minecraft.aimbow.aiming.Bow.BowColissionSolver;
+import net.famzangl.minecraft.aimbow.aiming.EnderPearl.EnderPearlColissionSolver;
 import net.famzangl.minecraft.aimbow.aiming.Fishing.FishingColissionSolver;
 import net.famzangl.minecraft.aimbow.aiming.Potion.PotionColissionSolver;
 import net.famzangl.minecraft.aimbow.aiming.Throwables.ThrowableColissionSolver;
@@ -109,9 +110,10 @@ public abstract class ColissionSolver {
 		if (heldItem == null) {
 			return null;
 		} else if (heldItem.getItem() == Items.snowball ||
-				heldItem.getItem() == Items.egg ||
-				heldItem.getItem() == Items.ender_pearl) {
+				heldItem.getItem() == Items.egg) {
 			return new ThrowableColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
+		} else if (heldItem.getItem() == Items.ender_pearl) {
+			return new EnderPearlColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
 		} else if (heldItem.getItem() == Items.experience_bottle ||
 				(heldItem.getItem() == Items.potionitem && ItemPotion.isSplash(heldItem.getMetadata()))) {
 			return new PotionColissionSolver(mc, (EntityLivingBase) mc.getRenderViewEntity());
